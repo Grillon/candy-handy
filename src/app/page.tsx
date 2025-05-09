@@ -1,103 +1,139 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from "react";
+import CandidateForm from "@/components/candidate-form";
+import CandidateCard from "@/components/candidate-card";
+
+import { saveAs } from 'file-saver';
+
+
+
+function generateId(entreprise: string) {
+  return `${Date.now()}-${entreprise.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+export default function CandyHandy() {
+  const [candidatures, setCandidatures] = useState<any[]>([]);
+  const [form, setForm] = useState({
+    id: "",
+    titre: "",
+    entreprise: "",
+    poste: "",
+    statut: "À faire",
+    date: new Date().toISOString().split("T")[0],
+    contact: "",
+    documents: "",
+    commentaires: "",
+  });
+
+const exportToCSV = () => {
+  if (candidatures.length === 0) return;
+
+  const headers = Object.keys(candidatures[0]).filter(k => k !== 'id');
+  const rows = candidatures.map((c) =>
+    headers.map((h) =>
+      Array.isArray(c[h]) ? `"${c[h].join(';')}"` : `"${String(c[h]).replace(/"/g, '""')}"`
+    ).join(',')
+  );
+
+  const csvContent = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  saveAs(blob, 'candidatures.csv');
+};
+
+const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target?.result as string;
+    const [headerLine, ...lines] = text.split('\n');
+    const headers = headerLine.split(',');
+
+    const newCandidatures = lines
+      .filter(line => line.trim())
+      .map(line => {
+        const values = line.split(',').map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
+        const obj: any = { id: `${Date.now()}-${Math.random().toString(36).substring(2, 8)}` };
+        headers.forEach((h, i) => {
+          const value = values[i] ?? '';
+          obj[h] = h === 'documents' ? value.split(';').map(v => v.trim()) : value;
+        });
+        return obj;
+      });
+
+    setCandidatures(prev => [...prev, ...newCandidatures]);
+  };
+
+  reader.readAsText(file);
+};
+
+  const handleChange = (e: React.ChangeEvent<any>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAddOrUpdate = () => {
+    const docsArray = form.documents.split(",").map((s) => s.trim());
+    if (form.id) {
+      // mode édition
+      setCandidatures(prev =>
+        prev.map(c => c.id === form.id ? { ...form, documents: docsArray } : c)
+      );
+    } else {
+      // création
+      const id = generateId(form.entreprise);
+      setCandidatures(prev => [...prev, { ...form, id, documents: docsArray }]);
+    }
+
+    // reset
+    setForm({
+      id: "",
+      titre: "",
+      entreprise: "",
+      poste: "",
+      statut: "À faire",
+      date: new Date().toISOString().split("T")[0],
+      contact: "",
+      documents: "",
+      commentaires: "",
+    });
+  };
+
+  const handleDelete = (id: string) => {
+  setCandidatures(prev => prev.filter(c => c.id !== id));
+};
+
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-center">CandyHandy 🍬</h1>
+      <CandidateForm form={form} onChange={handleChange} onSubmit={handleAddOrUpdate} isEditing={!!form.id} />
+      <div className="space-y-4 pt-6">
+        {candidatures.map((c) => (
+          <CandidateCard key={c.id} data={c} onEdit={() => setForm({ ...c, documents: c.documents.join(", ") })} onDelete={() => handleDelete(c.id)} />
+        ))}
+      </div>
+      <button onClick={exportToCSV} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+  📤 Exporter CSV
+</button>
+<label className="block mt-4">
+  <span className="text-sm font-medium">📥 Importer CSV</span>
+  <input
+    type="file"
+    accept=".csv"
+    onChange={importFromCSV}
+    className="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+               file:rounded file:border-0 file:text-sm file:font-semibold
+               file:bg-gray-100 file:text-blue-700 hover:file:bg-gray-200"
+  />
+</label>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
     </div>
   );
+
 }
+
+
+

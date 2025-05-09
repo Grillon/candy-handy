@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CandyHandy 🁬
 
-## Getting Started
+**CandyHandy** est une application minimaliste de suivi de candidatures développée avec **Next.js** et **Tailwind CSS**.
 
-First, run the development server:
+Elle a été conçue à la fois comme un outil personnel de gestion et comme une vitrine technique DevOps/Frontend.
+
+---
+
+## ✨ Fonctionnalités actuelles
+
+- Ajout et édition de fiches de candidature
+- Suppression individuelle
+- Export des candidatures au format CSV
+- Import de candidatures depuis un fichier CSV
+
+---
+
+## 🚀 Installation
 
 ```bash
+git clone https://github.com/votre-utilisateur/candy-handy.git
+cd candy-handy
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Accédez ensuite à [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 💻 Utilisation
 
-## Learn More
+- Remplissez le formulaire à gauche pour ajouter une fiche
+- Cliquez sur ✏️ pour modifier une fiche existante
+- Cliquez sur 🗑️ pour la supprimer
+- Utilisez 📤 pour exporter en `.csv`, 📥 pour importer un fichier `.csv`
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Améliorations prévues (non prioritaires)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 🔐 Ajout d’un backend Python (FastAPI)
+- 📆 Intégration base de données (SQLite en local, PostgreSQL pour le déploiement)
+- 📂 Upload / download de fichiers (CV, lettres, etc.)
+- 🏏️ Gestion des tags personnalisés par candidature
+- 🔍 Fonction de recherche & filtrage (par statut, mot-clé, entreprise...)
+- 💾 Sauvegarde automatique en localStorage
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📄 Licence
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ce projet est libre d’usage et d’évolution tant qu’il n’est pas exploité commercialement sans autorisation.
