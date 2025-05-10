@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CandidateForm from "@/components/candidate-form";
 import CandidateCard from "@/components/candidate-card";
 
@@ -26,6 +26,23 @@ export default function CandyHandy() {
     documents: "",
     commentaires: "",
   });
+
+useEffect(() => {
+  const saved = localStorage.getItem("candidatures");
+  if (saved) {
+    try {
+      setCandidatures(JSON.parse(saved));
+    } catch {
+      console.warn("Données invalides dans localStorage, nettoyage automatique");
+      localStorage.removeItem("candidatures");
+    }
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem("candidatures", JSON.stringify(candidatures));
+}, [candidatures]);
+
 
 const exportToCSV = () => {
   if (candidatures.length === 0) return;
