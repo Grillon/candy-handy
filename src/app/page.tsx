@@ -23,7 +23,7 @@ export default function CandyHandy() {
     statut: "À faire",
     date: new Date().toISOString().split("T")[0],
     contact: "",
-    documents: "",
+    documents: [{ titre: "", lien: "" }],
     commentaires: "",
   });
 
@@ -76,7 +76,9 @@ const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
         const obj: any = { id: `${Date.now()}-${Math.random().toString(36).substring(2, 8)}` };
         headers.forEach((h, i) => {
           const value = values[i] ?? '';
-          obj[h] = h === 'documents' ? value.split(';').map(v => v.trim()) : value;
+	  obj[h] = h === 'documents' ? value.split(';').map(v => ({ titre: "", lien: v.trim() }))
+  : value;
+
         });
         return obj;
       });
@@ -92,16 +94,15 @@ const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   const handleAddOrUpdate = () => {
-    const docsArray = form.documents.split(",").map((s) => s.trim());
     if (form.id) {
       // mode édition
       setCandidatures(prev =>
-        prev.map(c => c.id === form.id ? { ...form, documents: docsArray } : c)
+        prev.map(c => c.id === form.id ? form : c)
       );
     } else {
       // création
       const id = generateId(form.entreprise);
-      setCandidatures(prev => [...prev, { ...form, id, documents: docsArray }]);
+      setCandidatures(prev => [...prev, { ...form, id }]);
     }
 
     // reset
@@ -113,7 +114,7 @@ const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
       statut: "À faire",
       date: new Date().toISOString().split("T")[0],
       contact: "",
-      documents: "",
+      documents: [{ titre: "", lien: "" }],
       commentaires: "",
     });
   };
@@ -129,7 +130,7 @@ const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
       <CandidateForm form={form} onChange={handleChange} onSubmit={handleAddOrUpdate} isEditing={!!form.id} />
       <div className="space-y-4 pt-6">
         {candidatures.map((c) => (
-          <CandidateCard key={c.id} data={c} onEdit={() => setForm({ ...c, documents: c.documents.join(", ") })} onDelete={() => handleDelete(c.id)} />
+          <CandidateCard key={c.id} data={c} onEdit={() => setForm(c)} onDelete={() => handleDelete(c.id)} />
         ))}
       </div>
       <button onClick={exportToCSV} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">

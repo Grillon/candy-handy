@@ -33,9 +33,15 @@ Accédez ensuite à [http://localhost:3000](http://localhost:3000)
 - Remplissez le formulaire à gauche pour ajouter une fiche
 - Cliquez sur ✏️ pour modifier une fiche existante
 - Cliquez sur 🗑️ pour la supprimer
+- Ajoutez autant de documents 📂 que nécessaires
+- Les liens hypertext 🔗sont supportés
 - Utilisez 📤 pour exporter en `.csv`, 📥 pour importer un fichier `.csv`
 
 ---
+
+## 🔗 Vous souhaitez le tester?
+
+[CandyHandy sur Vercel](https://candy-handy.vercel.app/)
 
 ## 🛠️ Améliorations prévues (non prioritaires)
 
