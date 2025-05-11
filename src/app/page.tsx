@@ -6,8 +6,7 @@ import CandidateForm from "@/components/candidate-form";
 import CandidateCard from "@/components/candidate-card";
 
 import { saveAs } from 'file-saver';
-
-
+const DOCUMENT_SEPARATOR = '|||';
 
 function generateId(entreprise: string) {
   return `${Date.now()}-${entreprise.toLowerCase().replace(/\s+/g, '-')}`;
@@ -49,9 +48,17 @@ const exportToCSV = () => {
 
   const headers = Object.keys(candidatures[0]).filter(k => k !== 'id');
   const rows = candidatures.map((c) =>
-    headers.map((h) =>
-      Array.isArray(c[h]) ? `"${c[h].join(';')}"` : `"${String(c[h]).replace(/"/g, '""')}"`
-    ).join(',')
+	headers.map((h) => {
+		const value = c[h];
+		if (Array.isArray(value)) {
+			if (value.length > 0 && typeof value[0] === "object") {
+				return `"${value.map(d => `${d.titre}${DOCUMENT_SEPARATOR}${d.lien}`).join(';')}"`
+			}
+			return `"${value.join(';')}"`
+		}
+		return `"${String(value).replace(/"/g, '""')}"`
+	})
+
   );
 
   const csvContent = [headers.join(','), ...rows].join('\n');
@@ -76,8 +83,16 @@ const importFromCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
         const obj: any = { id: `${Date.now()}-${Math.random().toString(36).substring(2, 8)}` };
         headers.forEach((h, i) => {
           const value = values[i] ?? '';
-	  obj[h] = h === 'documents' ? value.split(';').map(v => ({ titre: "", lien: v.trim() }))
-  : value;
+	  obj[h] = h === 'documents'
+		  ? value.split(';').map((pair) => {
+			  const [titre, lien] = pair.split(DOCUMENT_SEPARATOR);
+			  return {
+				  titre: titre?.trim() || "",
+				  lien: lien?.trim() || ""
+			  };
+		  })
+			  : value;
+
 
         });
         return obj;
