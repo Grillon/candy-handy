@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { Document } from '@/lib/types';
 import { Application, ApplicationStatus } from '@/lib/types';
 import { getApplications, saveApplications, deleteApplication } from '@/lib/storage';
 import { ApplicationForm } from '@/components/application/ApplicationForm';
@@ -74,17 +75,24 @@ export default function Home() {
     toast.success('Candidature supprimée avec succès !');
   };
 
-  const handleUpdateDocuments = (applicationId: string, updatedDocuments: Document[]) => {
-    const updatedApplications = applications.map(app => {
-      if (app.id === applicationId) {
-        return { ...app, documents: updatedDocuments };
-      }
-      return app;
-    });
-    setApplications(updatedApplications);
-    saveApplications(updatedApplications);
-    toast.success('Documents mis à jour avec succès !');
-  };
+const handleUpdateDocuments = (applicationId: string, updatedDocuments: any[]) => {
+  const validatedDocuments: Document[] = updatedDocuments.map(doc => ({
+    title: doc.title ?? '',
+    link: doc.link ?? '',
+  }));
+
+  const updatedApplications = applications.map(app => {
+    if (app.id === applicationId) {
+      return { ...app, documents: validatedDocuments };
+    }
+    return app;
+  });
+
+  setApplications(updatedApplications);
+  saveApplications(updatedApplications);
+  toast.success('Documents mis à jour avec succès !');
+};
+
 
   const handleImport = (importedApplications: Application[]) => {
     // Merge imported applications with existing ones (avoid duplicates by ID)

@@ -50,10 +50,13 @@ export function ApplicationForm({ application, onSubmit, onCancel }: Application
 
   const handleSubmit = (values: FormValues) => {
     const submittedApplication: Application = {
-      id: application?.id || uuidv4(),
-      ...values,
-      documents,
+    id: application?.id || uuidv4(),
+    ...values,
+    contact: values.contact ?? '',
+    comments: values.comments ?? '',
+    documents,
     };
+
     onSubmit(submittedApplication);
   };
 

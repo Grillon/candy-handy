@@ -2,6 +2,8 @@
 
 import { Application } from '@/lib/types';
 import { ApplicationCard } from './ApplicationCard';
+import type { Document } from '@/lib/types';
+
 
 interface ApplicationListProps {
   applications: Application[];
