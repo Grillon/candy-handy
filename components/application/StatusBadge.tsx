@@ -12,7 +12,11 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     switch (status) {
       case ApplicationStatus.TODO:
         return "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200";
+      case ApplicationStatus.RECEIVED:
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case ApplicationStatus.SENT:
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case ApplicationStatus.POSITIONED:
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case ApplicationStatus.INTERVIEW:
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";

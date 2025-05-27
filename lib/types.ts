@@ -1,6 +1,8 @@
 export enum ApplicationStatus {
   TODO = "À faire",
+  RECEIVED = "Reçu",
   SENT = "Envoyé",
+  POSITIONED = "Positioné",
   INTERVIEW = "Entretien",
   ACCEPTED = "Accepté",
   REJECTED = "Refusé"
