@@ -26,12 +26,23 @@ const formSchema = z.object({
   date: z.string().min(1, { message: 'La date est requise' }),
   status: z.nativeEnum(ApplicationStatus),
   contact: z.string().optional(),
-  comments: z.string().optional(),
+  // comments field removed, now handled separately
 });
 
 type FormValues = z.infer<typeof formSchema> & { documents: Document[] };
 
 export function ApplicationForm({ application, onSubmit, onCancel }: ApplicationFormProps) {
+  const [comments, setComments] = useState(application?.comments || []);
+  const [newCommentDate, setNewCommentDate] = useState("");
+  const [newCommentContent, setNewCommentContent] = useState("");
+
+  const addComment = () => {
+    if (newCommentDate && newCommentContent.trim()) {
+      setComments([...comments, { date: newCommentDate, content: newCommentContent.trim() }]);
+      setNewCommentDate("");
+      setNewCommentContent("");
+    }
+  };
   const [documents, setDocuments] = useState<Document[]>(application?.documents || []);
   
   const form = useForm<FormValues>({
@@ -43,7 +54,6 @@ export function ApplicationForm({ application, onSubmit, onCancel }: Application
       date: application?.date || new Date().toISOString().slice(0, 10),
       status: application?.status || ApplicationStatus.TODO,
       contact: application?.contact || '',
-      comments: application?.comments || '',
       documents: application?.documents || [],
     },
   });
@@ -53,7 +63,7 @@ export function ApplicationForm({ application, onSubmit, onCancel }: Application
     id: application?.id || uuidv4(),
     ...values,
     contact: values.contact ?? '',
-    comments: values.comments ?? '',
+    comments,
     documents,
     };
 
@@ -63,19 +73,6 @@ export function ApplicationForm({ application, onSubmit, onCancel }: Application
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Titre</FormLabel>
-              <FormControl>
-                <Input placeholder="Titre de la candidature" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -165,30 +162,57 @@ export function ApplicationForm({ application, onSubmit, onCancel }: Application
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="comments"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Commentaires</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Notes, observations..."
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div>
           <FormLabel className="block mb-2">Documents</FormLabel>
-          <DocumentInput
-            documents={documents}
-            onChange={setDocuments}
-          />
+<ul className="space-y-2 mb-2">
+  {documents.map((doc, i) => (
+    <li key={i} className="flex flex-col gap-2 border p-2 rounded bg-muted">
+      <Input
+        type="text"
+        placeholder="Titre"
+        value={doc.title}
+        onChange={(e) => {
+          const newDocs = [...documents];
+          newDocs[i].title = e.target.value;
+          setDocuments(newDocs);
+        }}
+      />
+      <Input
+        type="text"
+        placeholder="Lien"
+        value={doc.link}
+        onChange={(e) => {
+          const newDocs = [...documents];
+          newDocs[i].link = e.target.value;
+          setDocuments(newDocs);
+        }}
+      />
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-red-600 text-xs"
+          onClick={() => {
+            const newDocs = documents.filter((_, index) => index !== i);
+            setDocuments(newDocs);
+          }}
+        >
+          Supprimer
+        </Button>
+      </div>
+    </li>
+  ))}
+</ul>
+
+<Button
+  type="button"
+  onClick={() => setDocuments([...documents, { title: '', link: '' }])}
+>
+  Ajouter un document
+</Button>
+
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
@@ -199,6 +223,66 @@ export function ApplicationForm({ application, onSubmit, onCancel }: Application
             {application ? 'Mettre à jour' : 'Créer'}
           </Button>
         </div>
+<div className="mt-6">
+  <h4 className="text-sm font-semibold text-muted-foreground">Commentaires</h4>
+<ul className="space-y-2">
+  {comments.map((comment, i) => (
+    <li key={i} className="flex flex-col gap-2 border p-2 rounded bg-muted text-sm">
+      <input
+        type="date"
+        value={comment.date}
+        onChange={(e) => {
+          const newComments = [...comments];
+          newComments[i].date = e.target.value;
+          setComments(newComments);
+        }}
+        className="rounded border border-input px-2 py-1 text-xs"
+      />
+      <Textarea
+        value={comment.content}
+        onChange={(e) => {
+          const newComments = [...comments];
+          newComments[i].content = e.target.value;
+          setComments(newComments);
+        }}
+        className="resize-none"
+      />
+      <div className="flex justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-red-600 text-xs"
+          onClick={() => {
+            const newComments = comments.filter((_, index) => index !== i);
+            setComments(newComments);
+          }}
+        >
+          Supprimer
+        </Button>
+      </div>
+    </li>
+  ))}
+</ul>
+
+  <div className="mt-4 space-y-2">
+    <input
+      type="date"
+      value={newCommentDate}
+      onChange={(e) => setNewCommentDate(e.target.value)}
+      className="w-full rounded border border-input bg-background px-2 py-1 text-sm"
+    />
+    <Textarea
+      value={newCommentContent}
+      onChange={(e) => setNewCommentContent(e.target.value)}
+      placeholder="Ajouter un commentaire"
+      className="resize-none"
+    />
+    <Button type="button" onClick={addComment} className="w-full">
+      Ajouter
+    </Button>
+  </div>
+</div>
+
       </form>
     </Form>
   );

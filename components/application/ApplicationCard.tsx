@@ -111,7 +111,14 @@ export function ApplicationCard({ application, onEdit, onDelete, onUpdateDocumen
               {application.comments && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Commentaires</p>
-                  <p className="text-sm whitespace-pre-wrap">{application.comments}</p>
+                  <ul className="space-y-1 text-sm">
+  {application.comments.map((comment, i) => (
+    <li key={i}>
+      <p className="text-xs text-gray-500">{comment.date}</p>
+      <p>{comment.content}</p>
+    </li>
+  ))}
+</ul>
                 </div>
               )}
 

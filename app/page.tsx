@@ -109,16 +109,22 @@ const handleUpdateDocuments = (applicationId: string, updatedDocuments: any[]) =
     setIsFormOpen(true);
   };
 
-  const filteredApplications = applications.filter(app => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      app.title.toLowerCase().includes(searchLower) ||
-      app.company.toLowerCase().includes(searchLower) ||
-      app.position.toLowerCase().includes(searchLower) ||
-      app.contact?.toLowerCase().includes(searchLower) ||
-      app.comments?.toLowerCase().includes(searchLower)
-    );
-  });
+const filteredApplications = applications.filter(app => {
+  const searchLower = searchQuery.toLowerCase();
+
+  const commentsText = Array.isArray(app.comments)
+    ? app.comments.map(c => `${c.date} ${c.content}`).join(' ')
+    : '';
+
+  return (
+    app.title?.toLowerCase().includes(searchLower) ||
+    app.company?.toLowerCase().includes(searchLower) ||
+    app.position?.toLowerCase().includes(searchLower) ||
+    app.contact?.toLowerCase().includes(searchLower) ||
+    commentsText.toLowerCase().includes(searchLower)
+  );
+});
+
 
   const totalPages = pageSize === 'unlimited' ? 1 : Math.ceil(filteredApplications.length / Number(pageSize));
   const paginatedApplications = pageSize === 'unlimited' 

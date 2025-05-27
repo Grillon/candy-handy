@@ -21,6 +21,9 @@ export interface Application {
   date: string;
   status: ApplicationStatus;
   contact: string;
-  comments: string;
+  comments: {
+  date: string;
+  content: string;
+}[];
   documents: Document[];
 }

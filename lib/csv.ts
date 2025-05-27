@@ -2,6 +2,8 @@ import { Application, ApplicationStatus, Document } from './types';
 
 const DOCUMENT_TITLE_LINK_SEPARATOR = '|||';
 const DOCUMENT_SEPARATOR = ';';
+const COMMENT_SEPARATOR = ';';
+const COMMENT_DATE_CONTENT_SEPARATOR = '|||';
 
 export function parseDocumentsString(documentsString: string): Document[] {
   if (!documentsString) return [];
@@ -18,6 +20,23 @@ export function stringifyDocuments(documents: Document[]): string {
   return documents
     .map(doc => `${doc.title}${DOCUMENT_TITLE_LINK_SEPARATOR}${doc.link}`)
     .join(DOCUMENT_SEPARATOR);
+}
+
+export function stringifyComments(comments: { date: string; content: string }[]): string {
+  return comments
+    .map(comment => `${comment.date}${COMMENT_DATE_CONTENT_SEPARATOR}${comment.content}`)
+    .join(COMMENT_SEPARATOR);
+}
+
+export function parseCommentsString(commentsString: string): { date: string; content: string }[] {
+  if (!commentsString) return [];
+  return commentsString
+    .split(COMMENT_SEPARATOR)
+    .filter(c => c.includes(COMMENT_DATE_CONTENT_SEPARATOR))
+    .map(c => {
+      const [date, content] = c.split(COMMENT_DATE_CONTENT_SEPARATOR);
+      return { date, content };
+    });
 }
 
 export function convertToCSV(applications: Application[]): string {
@@ -41,7 +60,7 @@ export function convertToCSV(applications: Application[]): string {
         app.date,
         app.status,
         `"${(app.contact || '').replace(/"/g, '""')}"`,
-        `"${(app.comments || '').replace(/"/g, '""')}"`,
+        `"${stringifyComments(app.comments).replace(/"/g, '""')}"`,
         `"${documentsString.replace(/"/g, '""')}"`
       ].join(',');
     })
@@ -96,7 +115,7 @@ export function parseCSV(csvString: string): Application[] {
         date,
         status: status as ApplicationStatus,
         contact: contact || '',
-        comments: comments || '',
+        comments: parseCommentsString(comments || ''),
         documents: parseDocumentsString(documentsString)
       };
     });
